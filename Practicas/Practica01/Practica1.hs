@@ -3,7 +3,7 @@ module Practica1
 --Practica 01
 --Pineda Lopez Milton Geovany
 where
-
+import Data.List(nub) 
 
 
 
@@ -40,16 +40,22 @@ type Modelo= [Variable]
 --Ejercicio 3 ---------------------------------------------------------
 --Implementa una funcion que reciba una formula y regrese el conjunto
 --o lista, de las variables usadas en la formula.
-toList :: PL -> [Variable]
-toList phi = case phi of --Segu la estructura de phi
+varList :: PL -> [Variable]
+varList phi = case phi of --Segu la estructura de phi
            -- Caso base
            Bot -> []
            Top -> []
            Var x -> [x]
            -- Casos recursivos
-           Imp alpha beta -> []
-           Dis alpha beta -> []
-           Con alpha beta -> []
+           Imp alpha beta -> nub $ (varList alpha) ++ (varList beta)
+           Dis alpha beta -> nub $ (varList alpha) ++ (varList beta)
+           Con alpha beta -> nub $ (varList alpha) ++ (varList beta)
+           Neg alpha      -> varList alpha
+
+--Tests:
+-- varList ((Var "p") `Imp` (Var "q"))
+-- varList (((Var "p") `Con` (Var "q")) `Imp`(Var "r"))
+-- varList (Neg (Var "p"))
 
 --Ejercicio 4 ---------------------------------------------------------
 --Utilizando el siguiente tipo de datos para formulas de PL
@@ -79,7 +85,10 @@ numConj phi = case phi of -- Segun la estructura de phi:
             Con alpha beta  -> (numConj alpha)+ numConj(beta) + 1 --Si phi=alpha & beta
             Neg alpha       -> numConj alpha  
 
---numConj (((Var "q") `Con` (Var "p")) `Con` (Var "p"))
+--Tests:
+-- numConj (((Var "q") `Con` (Var "p")) `Con` (Var "p"))
+-- numConj (((Neg(Var "A"))  (Var "B")) `Con` ((Var "A") `Imp` (Var "B"))) 
+-- numConj (((Var "p") `Con` (Neg(Var "q"))) `Imp` (Var "r"))
 
 --Una funciones que reciba un operador de la logica de PL (ya sea 
 --conjunciones,disyunciones) y una formula y regrese el numero de 
@@ -110,7 +119,10 @@ quitaImp phi = case phi of -- Segun la estructura de phi:
             Con alpha beta  -> (quitaImp alpha) `Con` quitaImp(beta)          --Si phi=alpha & beta
             Neg alpha       -> (Neg(quitaImp alpha))                          --Si phi= -alpha
 
- -- quitaImp ((Var "q") `Imp` (Var "p"))
+--Tests:
+-- quitaImp ((Var "q") `Imp` (Var "p"))
+-- quitaImp (((Var "p") `Con` (Var "q")) `Imp`(Var "r"))
+-- quitaImp (((Var "p") `Imp` (Var "q")) `Con` ((Var "r") `Imp` (Var "s")))
 
 --2. Implementa el algoritmo quitaAnd, que recibe una formula de Logica
 --Proposicional y regresa una formula de Logica proposicional sin apari-
