@@ -13,9 +13,9 @@ import Data.List(nub)
 --haskell, tambien puedes crear tu propia implementacion.
 
 --Variables representadas como cadenas
+type Variable   = String
 
 --Variables representadas como enteros
-type Variable   = String
 
 --Variables definidas recursivamente
 
@@ -67,6 +67,7 @@ data PL = Bot           --Constructor para bottom
         | Dis PL PL     --Constructor de disyunciones
         | Con PL PL     --Constructor de conjunciones
         | Neg PL        --Constructor de negaciones
+        | Nor PL PL     --Constructor de Nor
         deriving (Eq,Show)
 
 
@@ -147,9 +148,23 @@ quitaImp phi = case phi of -- Segun la estructura de phi:
 --proposicional y regresa una formula en donde solo aparece el 
 --operador nor.
 
+lNor:: PL -> PL
+lNor phi = case phi of -- Segun la estructura de phi:
+            -- Casos base:
+            Bot             -> Bot   --Si phi=Bot
+            Top             -> Top   --Si phi=Top
+            Var a           -> Var a --Si phi es una variable
+            -- Casos recursivos:
+            Imp alpha beta  -> ((lNor alpha `Nor` lNor alpha) `Nor` lNor beta) `Nor` ((lNor alpha `Nor` lNor alpha) `Nor` lNor beta) --Si phi=alpha -> beta
+            Dis alpha beta  -> (lNor alpha `Nor` lNor beta) `Nor` (lNor alpha `Nor` lNor beta)  --Si phi=alpha | beta
+            Con alpha beta  -> (lNor alpha `Nor` lNor alpha) `Nor` (lNor beta `Nor` lNor beta)  --Si phi=alpha & beta
+            Neg alpha       -> (lNor alpha `Nor` lNor alpha) --Si phi= -alpha
 
 
-
+--Tests:
+-- lNor ((Var "p") `Dis` (Var "q"))
+-- lNor (((Var "p") `Dis` (Var "q")) `Imp`(Var "r"))
+-- lNor (Neg(Var "p"))
 
 --Ejercicio 7 ---------------------------------------------------------
 
