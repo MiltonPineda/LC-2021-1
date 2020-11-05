@@ -19,7 +19,15 @@ type Variable   = String
 
 --Variables definidas recursivamente
 
+--Formulas
+f1:: PL
+f1 = ((Var "1") `Imp` (Var "2"))
 
+f2::PL 
+f2 = ((Var "1") `Con` (Var "1"))
+
+f3::PL 
+f3 = ((Var "1") `Dis` (Var "2"))
 
 
 --Ejercicio 2 ---------------------------------------------------------
@@ -33,15 +41,21 @@ type Variable   = String
 --Definicion de valuaciones como listas
 type Modelo= [Variable]
 
+m1 ::Modelo
+m1= ["0"]   --Es la unica variable verdadera
 
+m2 ::Modelo
+m2= []      --Ninguna variable es verdadera
 
+m3 ::Modelo
+m3= ["1"]   --Es la unica variable verdadera
 
 
 --Ejercicio 3 ---------------------------------------------------------
 --Implementa una funcion que reciba una formula y regrese el conjunto
 --o lista, de las variables usadas en la formula.
 varList :: PL -> [Variable]
-varList phi = case phi of --Segu la estructura de phi
+varList phi = case phi of --Segun la estructura de phi
            -- Caso base
            Bot -> []
            Top -> []
@@ -53,9 +67,11 @@ varList phi = case phi of --Segu la estructura de phi
            Neg alpha      -> varList alpha
 
 --Tests:
+-- varList f1
 -- varList ((Var "p") `Imp` (Var "q"))
 -- varList (((Var "p") `Con` (Var "q")) `Imp`(Var "r"))
 -- varList (Neg (Var "p"))
+
 
 --Ejercicio 4 ---------------------------------------------------------
 --Utilizando el siguiente tipo de datos para formulas de PL
@@ -78,15 +94,18 @@ data PL = Bot           --Constructor para bottom
 
 numConj :: PL -> Int
 numConj phi = case phi of -- Segun la estructura de phi:
+            -- Casos base:
             Bot             -> 0 --Si phi=Bot
             Top             -> 0 --Si phi=Top
             Var _           -> 0 --Si phi es una variable 
+            -- Casos recursivos
             Imp alpha beta  -> (numConj alpha)+ numConj(beta)     --Si phi=alpha -> beta
             Dis alpha beta  -> (numConj alpha)+ numConj(beta)     --Si phi=alpha | beta
             Con alpha beta  -> (numConj alpha)+ numConj(beta) + 1 --Si phi=alpha & beta
             Neg alpha       -> numConj alpha  
 
 --Tests:
+-- numConj f2
 -- numConj (((Var "q") `Con` (Var "p")) `Con` (Var "p"))
 -- numConj (((Neg(Var "A"))  (Var "B")) `Con` ((Var "A") `Imp` (Var "B"))) 
 -- numConj (((Var "p") `Con` (Neg(Var "q"))) `Imp` (Var "r"))
@@ -96,8 +115,6 @@ numConj phi = case phi of -- Segun la estructura de phi:
 --apariciones del operador en la formula
 
 --Crea una instancia de la clase show para el tipo de datos PL
-
-
 
 
 --Ejercicio 5 ---------------------------------------------------------
@@ -113,7 +130,7 @@ quitaImp phi = case phi of -- Segun la estructura de phi:
             -- Casos base:
             Bot             -> Bot   --Si phi=Bot
             Top             -> Top   --Si phi=Top
-            Var a           -> Var a --Si phi es una variable
+            Var x           -> Var x --Si phi es una variable
             -- Casos recursivos:
             Imp alpha beta  -> (Neg(quitaImp alpha)) `Dis` (quitaImp(beta))   --Si phi=alpha -> beta
             Dis alpha beta  -> (quitaImp alpha) `Dis` (quitaImp(beta))        --Si phi=alpha | beta
@@ -121,6 +138,7 @@ quitaImp phi = case phi of -- Segun la estructura de phi:
             Neg alpha       -> (Neg(quitaImp alpha))                          --Si phi= -alpha
 
 --Tests:
+-- quitaImp f1
 -- quitaImp ((Var "q") `Imp` (Var "p"))
 -- quitaImp (((Var "p") `Con` (Var "q")) `Imp`(Var "r"))
 -- quitaImp (((Var "p") `Imp` (Var "q")) `Con` ((Var "r") `Imp` (Var "s")))
@@ -132,8 +150,6 @@ quitaImp phi = case phi of -- Segun la estructura de phi:
 --3. Implementa el algoritmo quitaOr, que recibe una formula de Logica 
 --Proposicional y regresa una formula de Logica proposicional sin 
 --apariciones del operador or.
-
-
 
 
 --Ejercicio 6 ---------------------------------------------------------
@@ -162,9 +178,11 @@ lNor phi = case phi of -- Segun la estructura de phi:
 
 
 --Tests:
+-- lNor f3
 -- lNor ((Var "p") `Dis` (Var "q"))
 -- lNor (((Var "p") `Dis` (Var "q")) `Imp`(Var "r"))
 -- lNor (Neg(Var "p"))
+
 
 --Ejercicio 7 ---------------------------------------------------------
 
@@ -172,8 +190,8 @@ lNor phi = case phi of -- Segun la estructura de phi:
 --modelo y una formula de PL y regrese si el modelo satisface o no a 
 --la formula.
 
+
 mSatisface :: Modelo-> PL -> Bool
--- mSatisface m phi implementa "m |= phi".
 mSatisface m phi= case phi of -- Segun la estructura de phi:
         -- Casos base:
         Bot             -> False        --m no satisface bottom
@@ -187,3 +205,9 @@ mSatisface m phi= case phi of -- Segun la estructura de phi:
         Con alpha beta  ->     (mSatisface m alpha)     -- m satisface a alpha
                             && (mSatisface m beta)      -- y m satisface a beta
         Neg alpha       ->  not(mSatisface m alpha)     -- m no satisface a alpha
+
+
+--Tests:
+-- mSatisface m1 f1
+-- mSatisface m2 f2
+-- mSatisface m3 f3
