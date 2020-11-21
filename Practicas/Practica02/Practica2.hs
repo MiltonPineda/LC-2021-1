@@ -2,7 +2,7 @@ module Practica2
 -- Logica Computacional 2020-1.
 -- Practica 02
 -- Pineda Lopez Milton Geovany
--- Angelica Lizbeth Garcia Zarraga
+-- Garcia Zarraga Angelica Lizbeth 
 where
 
 type Variable   = Int
